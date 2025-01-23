@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  build-java:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,27 +24,6 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build
 
-  publish:
-    needs: build
-    runs-on: ubuntu-latest
-    if: success()  # Only runs if the build job is successful
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Create Git tag
-      run: |
-        TAG="v${{ github.run_number }}"
-        git tag $TAG
-        git push origin $TAG
-
-    - name: Upload JAR to GitHub Releases
-      uses: softprops/action-gh-release@v1
-      with:
-        files: build/libs/*.jar  # Adjust the path to your JAR files
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build and Push Docker Image
       uses: mr-smithers-excellent/docker-build-push@v4
