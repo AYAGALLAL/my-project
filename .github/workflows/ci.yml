@@ -47,7 +47,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build and Push Docker Image
-      uses: softprops/action-gh-release@v4
+      uses: mr-smithers-excellent/docker-build-push@v4
       with:
         image: ayagallal/tutorial  
         registry: docker.io
