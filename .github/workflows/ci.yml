@@ -1,6 +1,3 @@
-# This workflow will build a Java project with Gradle
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
-
 name: Java CI with Gradle
 
 on:
@@ -10,10 +7,12 @@ on:
     branches: [ master ]
 
 jobs:
-  build-java:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
 
-    runs-on: ubuntu-latest
-    
     steps:
     - uses: actions/checkout@v2
 
@@ -28,11 +27,26 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build
 
-    - name: Build and Push Docker Image
-      uses: mr-smithers-excellent/docker-build-push@v4
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    if: success()  # Only runs if the build job is successful
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Upload JAR to GitHub Releases
+      uses: softprops/action-gh-release@v1
       with:
-        image: nanajanashia/demo-app
-        registry: docker.io
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+        files: build/libs/*.jar  # Adjust the path to your JAR files
+
+    - name: Create Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
+        -d '{"tag_name": "v${{ github.run_number }}", "name": "Release v${{ github.run_number }}", "body": "Automated release of the project."}' \
+        https://api.github.com/repos/${{ github.repository }}/releases
+
          
