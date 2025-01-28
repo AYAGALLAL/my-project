@@ -1,6 +1,11 @@
 FROM openjdk:8-jre-alpine
 
-COPY ./build/libs/my-app-1.0-SNAPSHOT.jar /usr/app/
+# Expose the port the app listens on
+EXPOSE 8080
+
+# Build argument to receive the JAR file path!!!!!!
+ARG JAR_FILE
+COPY ${JAR_FILE} /usr/app/
 
 WORKDIR /usr/app
 
